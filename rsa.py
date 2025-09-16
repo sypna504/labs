@@ -1,3 +1,6 @@
+import sys,string
+lat_alp=[i for i in string.ascii_uppercase]
+asci_alp=[chr(i) for i in range(32,126+1)]
 def is_prime(n):
     if len(delit(n))==2:
         return True
@@ -5,9 +8,10 @@ def is_prime(n):
         return False
 
 def multiplicative_inverse(e: int, phi:int) -> int:
-    if gcd(e,phi)==1:
-        return True
-    False
+    for d in range(1,phi):
+        if (e*d)%phi==1:
+            return d
+
 
 def delit(n):
     deli=[]
@@ -38,9 +42,40 @@ def gcd(x,y):
 def generate_keypair(p: int, q: int):
     if q==p:
         return 0
+    # if sys.getsizeof(p)>=2048 and sys.getsizeof(q)>=2048:
     n=p*q
     phi=(p-1)*(q-1)
-    e=65537
+    elements=[]
+    for element in range(1,phi):
+        if gcd(element,phi)==1 and element<phi and element>1:
+            elements.append(element)
+    e=elements[0]
     d=multiplicative_inverse(e,phi)
     return ((e,n),(n,d))
-        
+
+def encrypt(public_key: tuple, text: str):
+    result=[]
+    public_key=public_key[0]
+    n=public_key[1]
+    e=public_key[0]
+    for i in text:
+        M=asci_alp.index(i)
+        C=(M**e)%n
+        result.append(C)
+    return result
+
+def decrypt(private_key: tuple, cipher_list: list):
+    result=""
+    private_key=private_key[-1]
+    n=private_key[0]
+    d=private_key[1]
+    for C in cipher_list:
+        M=(C**d)%n
+        word=asci_alp[M]
+        result+=word
+    return result
+key=generate_keypair(61,53)
+encr=encrypt(key,"Special chars: @#$%^&*()")
+print(encr)
+print(decrypt(key,encr))
+ 
